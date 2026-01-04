@@ -96,6 +96,7 @@ const mockMovies: Movie[] = [
 export default function Index() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [selectedQuality, setSelectedQuality] = useState('FHD');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('Все');
@@ -114,6 +115,7 @@ export default function Index() {
     setSelectedMovie(movie);
     setSelectedQuality(movie.quality.includes('FHD') ? 'FHD' : movie.quality[0]);
     setIsPlayerOpen(true);
+    setIsPlaying(false);
   };
 
   return (
@@ -308,20 +310,44 @@ export default function Index() {
           
           {selectedMovie && (
             <div className="space-y-6">
-              <div className="aspect-video bg-black rounded-lg flex items-center justify-center relative overflow-hidden">
-                <img 
-                  src={selectedMovie.poster} 
-                  alt={selectedMovie.title}
-                  className="absolute inset-0 w-full h-full object-cover blur-xl opacity-30"
-                />
-                <div className="relative z-10 text-center space-y-4">
-                  <Button size="lg" className="rounded-full w-20 h-20">
-                    <Icon name="Play" size={32} />
-                  </Button>
-                  <p className="text-sm text-muted-foreground">
-                    Нажмите для воспроизведения
-                  </p>
-                </div>
+              <div className="aspect-video bg-black rounded-lg relative overflow-hidden group/player">
+                {!isPlaying ? (
+                  <>
+                    <img 
+                      src={selectedMovie.poster} 
+                      alt={selectedMovie.title}
+                      className="absolute inset-0 w-full h-full object-cover blur-xl opacity-30"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <Button 
+                        size="lg" 
+                        className="rounded-full w-20 h-20 hover:scale-110 transition-transform"
+                        onClick={() => setIsPlaying(true)}
+                      >
+                        <Icon name="Play" size={32} />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full">
+                    <video
+                      className="w-full h-full"
+                      controls
+                      autoPlay
+                      poster={selectedMovie.poster}
+                      onEnded={() => setIsPlaying(false)}
+                    >
+                      <source 
+                        src={`https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`}
+                        type="video/mp4"
+                      />
+                      Ваш браузер не поддерживает воспроизведение видео.
+                    </video>
+                    <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded-full text-sm font-medium">
+                      {selectedQuality}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-4">
